@@ -1,0 +1,29 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "taskName": "build",
+            "type": "shell",
+            "command": "konanc",
+            "args": [
+                "-opt",
+                "-target mingw",
+                "-library bin/sdl",
+                "-linkerOpts -mwindows",
+                "-linkerOpts bin/Tetris.res",
+                "-linkerOpts -L/msys64/mingw64/lib",
+                "-linkerOpts -lSDL2",
+                "-output bin/Tetris",
+                "src/main/kotlin/main.kt",
+                "src/main/kotlin/Tetris.kt"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
+
