@@ -14,6 +14,6 @@ REM copy %MINGW%\bin\SDL2.dll bin\SDL2.dll
 
 call cinterop -def "%DIR%\src\main\c_interop\sdl.def" -compilerOpts "%CFLAGS%" -target "%TARGET%" -o bin/sdl || exit /b
 rem Windows build requires Windows Resource Compiler in paths.
-call windres "%DIR%\src\main\resources\Tetris.rc" -O coff -o "%DIR%\bin\Tetris.res" || exit /b
+call windres "%DIR%\src\main\resources\Shmupwarz.rc" -O coff -o "%DIR%\bin\Shmupwarz.res" || exit /b
 call konanc -target "%TARGET%" "%DIR%\src\main\kotlin\main.kt" "%DIR%\src\main\kotlin\Tetris.kt" -library bin/sdl -linkerOpts "%LFLAGS%" -opt -o bin\Tetris || exit /b
 

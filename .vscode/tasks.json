@@ -11,13 +11,15 @@
                 "-opt",
                 "-target mingw",
                 "-library bin/sdl",
-                "-linkerOpts -mwindows",
-                "-linkerOpts bin/Tetris.res",
+                "-linkerOpts bin/Shmupwarz.res",
                 "-linkerOpts -L/msys64/mingw64/lib",
                 "-linkerOpts -lSDL2",
-                "-output bin/Tetris",
-                "src/main/kotlin/main.kt",
-                "src/main/kotlin/Tetris.kt"
+                "-linkerOpts -lSDL2_image",
+                "-linkerOpts -lSDL2_mixer",
+                "-linkerOpts -lSDL2_ttf",
+                "-linkerOpts -mwindows",
+                "-output bin/shmupwarz",
+                "src/main/kotlin/shmupwarz.kt"
             ],
             "group": {
                 "kind": "build",
