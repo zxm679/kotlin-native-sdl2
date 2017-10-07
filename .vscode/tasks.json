@@ -19,6 +19,7 @@
                 "-linkerOpts -lSDL2_ttf",
                 "-linkerOpts -mwindows",
                 "-output bin/shmupwarz",
+                "src/main/kotlin/components.kt",
                 "src/main/kotlin/shmupwarz.kt"
             ],
             "group": {
