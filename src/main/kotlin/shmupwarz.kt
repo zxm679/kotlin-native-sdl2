@@ -43,15 +43,22 @@ class Game(val width: Int, val height: Int) {
     private var displayHeight: Int = 0
     private val window: CPointer<SDL_Window>
     private val renderer: CPointer<SDL_Renderer>
-    private val texture: CPointer<SDL_Texture>
     private val platform: String
     private val pool = Arena()
-    private val rect: SDL_Rect
     private var running: Boolean = false
-
+    val entities: List<Entity>
+    val count: Int
     val isRunning get() = running
 
+    object mouse {
+        var x = 0
+        var y = 0
+        var pressed = false
+    }
+
     init {
+        srand(time(null).toInt())
+        
         if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
             println("SDL_Init Error: ${get_SDL_Error()}")
             throw Error()
@@ -99,41 +106,24 @@ class Game(val width: Int, val height: Int) {
             throw Error()
         }
         this.renderer = renderer
-
-        rect = pool.alloc<SDL_Rect>()
-        rect.w = width
-        rect.h = height
-        rect.x = 0
-        rect.y = 0
-
-        texture = loadImage(window, renderer, "images/background.png")
-    }
-
-    private fun loadImage(win: CPointer<SDL_Window>, ren: CPointer<SDL_Renderer>, imagePath: String): CPointer<SDL_Texture> {
-        val bmp = IMG_LoadPNG_RW(SDL_RWFromFile(imagePath, "rb"));
-        if (bmp == null) {
-            SDL_DestroyRenderer(ren)
-            SDL_DestroyWindow(win)
-            println("IMG_LoadPNG_RW Error: ${get_SDL_Error()}")
-            SDL_Quit()
-            throw Error()
-        }
-
-        val tex = SDL_CreateTextureFromSurface(ren, bmp)
-        SDL_FreeSurface(bmp)
-        if (tex == null) {
-            SDL_DestroyRenderer(ren)
-            SDL_DestroyWindow(win)
-            println("SDL_CreateTextureFromSurface Error: ${get_SDL_Error()}")
-            SDL_Quit()
-            throw Error()
-        }
-        return tex
+        entities = Entities.createLevel(renderer)
+        count = entities.size
     }
 
     fun update() {
         SDL_RenderClear(renderer)
-        SDL_RenderCopy(renderer, texture, null, rect.ptr.reinterpret())
+
+        for (e in entities) {
+            if (e.active) {
+                val rect = pool.alloc<SDL_Rect>()
+                rect.w = e.sprite.width
+                rect.h = e.sprite.height
+                rect.x = e.position.x.toInt()
+                rect.y = e.position.y.toInt()
+                SDL_RenderCopy(renderer, e.sprite.texture, null, rect.ptr.reinterpret())
+
+            }
+        }
         SDL_RenderPresent(renderer)
     }
 
@@ -153,25 +143,28 @@ class Game(val width: Int, val height: Int) {
                     SDL_QUIT -> {
                         running = false
                     }
-                    // SDL_KEYDOWN -> {
-                    //     val keyboardEvent = event.ptr.reinterpret<SDL_KeyboardEvent>().pointed
-                    //     when (keyboardEvent.keysym.scancode) {
-                    //         SDL_SCANCODE_LEFT -> commands.add(UserCommand.LEFT)
-                    //         SDL_SCANCODE_RIGHT -> commands.add(UserCommand.RIGHT)
-                    //         SDL_SCANCODE_DOWN -> commands.add(UserCommand.DOWN)
-                    //         SDL_SCANCODE_Z, SDL_SCANCODE_SPACE -> commands.add(UserCommand.ROTATE)
-                    //         SDL_SCANCODE_UP -> commands.add(UserCommand.DROP)
-                    //         SDL_SCANCODE_ESCAPE -> commands.add(UserCommand.EXIT)
-                    //     }
-                    // }
-                    // SDL_MOUSEBUTTONDOWN -> if (gamePadButtons != null) {
-                    //     val mouseEvent = event.ptr.reinterpret<SDL_MouseButtonEvent>().pointed
-                    //     val x = mouseEvent.x
-                    //     val y = mouseEvent.y
-                    //     val command = gamePadButtons.getCommandAt(x, y)
-                    //     if (command != null)
-                    //         commands.add(command)
-                    // }
+                    SDL_KEYDOWN -> {
+                        val keyboardEvent = event.ptr.reinterpret<SDL_KeyboardEvent>().pointed
+                        when (keyboardEvent.keysym.scancode) {
+                            SDL_SCANCODE_ESCAPE -> running = false
+                        }
+                    }
+                    SDL_MOUSEBUTTONUP -> {
+                        mouse.pressed = false
+                    }
+                    SDL_MOUSEBUTTONDOWN -> {
+                        val mouseEvent = event.ptr.reinterpret<SDL_MouseButtonEvent>().pointed
+                        mouse.x = mouseEvent.x
+                        mouse.y = mouseEvent.y
+                        mouse.pressed = true
+                    }
+                    SDL_MOUSEMOTION -> {
+                        val mouseEvent = event.ptr.reinterpret<SDL_MouseMotionEvent>().pointed
+                        mouse.x = mouseEvent.x
+                        mouse.y = mouseEvent.y
+                        entities[count-1].position.x = mouse.x.toDouble()
+                        entities[count-1].position.y = mouse.y.toDouble()
+                    }
                 }
             }
         }
@@ -179,7 +172,7 @@ class Game(val width: Int, val height: Int) {
 
 
     fun destroy() {
-        SDL_DestroyTexture(texture)
+        SDL_DestroyTexture(entities[0] .sprite.texture)
         SDL_DestroyRenderer(renderer)
         SDL_DestroyWindow(window)
         SDL_Quit()

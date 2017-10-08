@@ -13,13 +13,16 @@
                 "-library bin/sdl",
                 "-linkerOpts bin/Shmupwarz.res",
                 "-linkerOpts -L/msys64/mingw64/lib",
+                "-linkerOpts -lm",
                 "-linkerOpts -lSDL2",
                 "-linkerOpts -lSDL2_image",
                 "-linkerOpts -lSDL2_mixer",
                 "-linkerOpts -lSDL2_ttf",
                 "-linkerOpts -mwindows",
                 "-output bin/shmupwarz",
+                "src/main/kotlin/math.kt",
                 "src/main/kotlin/components.kt",
+                "src/main/kotlin/entities.kt",
                 "src/main/kotlin/shmupwarz.kt"
             ],
             "group": {
